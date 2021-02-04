@@ -34,6 +34,9 @@ namespace Lasaro.ExchangeRate.API.Controllers
             if (date.HasValue)
                 effectiveDate = date.Value.Date;
 
+            if (!await RatesService.IsValidCurrencyToQuoteAsync(currencyCode))
+                return BadRequest("Currency not valid");
+
             CurrencyQuoteModel currencyQuote = await RatesService.GetRateQuoteAsync(currencyCode, effectiveDate);
 
             return Ok(currencyQuote);
