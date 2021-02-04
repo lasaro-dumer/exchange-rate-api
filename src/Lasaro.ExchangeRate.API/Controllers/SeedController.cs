@@ -31,7 +31,7 @@ namespace Lasaro.ExchangeRate.API.Controllers
                     CurrencyCode = "USD",
                     BuyValue = 86.750,
                     SellValue = 92.750,
-                    EffectiveDate = DateTime.Now.Date
+                    EffectiveDate = new DateTime(2021, 2, 4, 15, 0, 0)
                 };
 
                 Rate brlRate = new Rate()
@@ -39,7 +39,7 @@ namespace Lasaro.ExchangeRate.API.Controllers
                     CurrencyCode = "BRL",
                     BuyValue = usdRate.BuyValue / 4,
                     SellValue = usdRate.SellValue / 4,
-                    EffectiveDate = DateTime.Now.Date
+                    EffectiveDate = new DateTime(2021, 2, 4, 15, 0, 0)
                 };
 
                 RatesRepository.AddRate(usdRate);
