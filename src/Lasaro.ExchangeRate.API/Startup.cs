@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Lasaro.ExchangeRate.API.Services.Abstractions;
+using Lasaro.ExchangeRate.API.Services.Implementations;
+using Lasaro.ExchangeRate.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -27,6 +30,8 @@ namespace Lasaro.ExchangeRate.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddExchangeRateData(Configuration);
+            services.AddScoped<IRatesService, RatesService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

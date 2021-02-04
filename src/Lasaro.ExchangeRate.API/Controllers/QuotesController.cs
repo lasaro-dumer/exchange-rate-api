@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Lasaro.ExchangeRate.API.Models;
+using Lasaro.ExchangeRate.API.Services.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -11,29 +13,30 @@ namespace Lasaro.ExchangeRate.API.Controllers
     [Route("[controller]")]
     public class QuotesController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+        public IRatesService RatesService { get; }
 
-        private readonly ILogger<QuotesController> _logger;
-
-        public QuotesController(ILogger<QuotesController> logger)
+        public QuotesController(IRatesService ratesService)
         {
-            _logger = logger;
+            RatesService = ratesService;
         }
 
         [HttpGet]
-        public IEnumerable<WeatherForecast> Get()
+        public async Task<IActionResult> GetAllQuotesAsync(DateTime? date = null)
         {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            })
-            .ToArray();
+            return Ok(await RatesService.GetRatesAsync(date: date));
+        }
+
+        [HttpGet("{currencyCode}")]
+        public async Task<IActionResult> GetAsync(string currencyCode, DateTime? date = null)
+        {
+            DateTime effectiveDate = DateTime.Now.Date;
+
+            if (date.HasValue)
+                effectiveDate = date.Value.Date;
+
+            CurrencyQuoteModel currencyQuote = await RatesService.GetRateQuoteAsync(currencyCode, effectiveDate);
+
+            return Ok(currencyQuote);
         }
     }
 }
