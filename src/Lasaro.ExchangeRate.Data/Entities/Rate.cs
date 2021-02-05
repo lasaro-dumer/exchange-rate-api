@@ -12,5 +12,10 @@ namespace Lasaro.ExchangeRate.Data.Entities
         public double BuyValue { get; set; }
         public double SellValue { get; set; }
         public DateTime CreateDate { get; set; }
+        public virtual List<CurrencyExchangeTransaction> Transactions { get; set; }
+        public Rate()
+        {
+            Transactions = new List<CurrencyExchangeTransaction>();
+        }
     }
 }
