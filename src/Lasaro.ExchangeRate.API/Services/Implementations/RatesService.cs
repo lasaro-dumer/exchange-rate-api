@@ -38,7 +38,7 @@ namespace Lasaro.ExchangeRate.API.Services.Implementations
         {
             List<string> validCurrencies = await RatesRepository.GetAllCurrencyCodesAsync();
 
-            return validCurrencies.Contains(currencyCode);
+            return validCurrencies.Contains(currencyCode.ToUpper());
         }
 
         public async Task<CurrencyQuoteModel> GetRateQuoteAsync(string currencyCode, DateTime date)

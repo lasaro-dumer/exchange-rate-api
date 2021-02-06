@@ -21,7 +21,7 @@ namespace Lasaro.ExchangeRate.Data.Repositories.Implementations
         public async Task<double?> GetCurrencyTransactionLimitAsync(string currencyCode)
         {
             double? limit = (await _context.Set<Currency>()
-                                           .Where(c => c.Code == currencyCode)
+                                           .Where(c => c.Code.ToUpper() == currencyCode.ToUpper())
                                            .FirstOrDefaultAsync())?.MonthlyTransactionLimit;
             
             return limit;
@@ -31,7 +31,7 @@ namespace Lasaro.ExchangeRate.Data.Repositories.Implementations
         {
             double amount = await _context.Set<CurrencyExchangeTransaction>()
                                           .Where(ct => ct.UserId == userId &&
-                                                       ct.ForeignCurrencyCode == currencyCode &&
+                                                       ct.ForeignCurrencyCode.ToUpper() == currencyCode.ToUpper() &&
                                                        ct.TransactionDate.Year == dateOfTheMonth.Year &&
                                                        ct.TransactionDate.Month == dateOfTheMonth.Month)
                                           .SumAsync(ct => ct.ForeignCurrencyAmount);

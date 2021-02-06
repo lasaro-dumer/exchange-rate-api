@@ -28,10 +28,10 @@ namespace Lasaro.ExchangeRate.Data.Repositories.Implementations
             IQueryable<Rate> ratesQuery = _context.Set<Rate>().AsQueryable();
 
             if (!string.IsNullOrEmpty(currencyCode))
-                ratesQuery = ratesQuery.Where(r => r.CurrencyCode == currencyCode);
+                ratesQuery = ratesQuery.Where(r => r.CurrencyCode.ToUpper() == currencyCode.ToUpper());
 
             if (effectiveDate.HasValue)
-                ratesQuery = ratesQuery.Where(r => r.EffectiveDate == effectiveDate);
+                ratesQuery = ratesQuery.Where(r => r.EffectiveDate.Date == effectiveDate.Value.Date);
 
             return await ratesQuery.OrderByDescending(r => r.CreateDate).ToListAsync();
         }
@@ -43,7 +43,7 @@ namespace Lasaro.ExchangeRate.Data.Repositories.Implementations
 
         public async Task<List<string>> GetAllCurrencyCodesAsync()
         {
-            return await _context.Set<Currency>().Select(r => r.Code).ToListAsync();
+            return await _context.Set<Currency>().Select(r => r.Code.ToUpper()).ToListAsync();
         }
     }
 }
