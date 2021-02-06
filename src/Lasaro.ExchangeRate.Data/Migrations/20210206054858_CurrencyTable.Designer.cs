@@ -4,14 +4,16 @@ using Lasaro.ExchangeRate.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Lasaro.ExchangeRate.Data.Migrations
 {
     [DbContext(typeof(ExchangeRateContext))]
-    partial class ExchangeRateContextModelSnapshot : ModelSnapshot
+    [Migration("20210206054858_CurrencyTable")]
+    partial class CurrencyTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

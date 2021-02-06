@@ -11,6 +11,6 @@ namespace Lasaro.ExchangeRate.Data.Repositories.Abstractions
         void AddRate(Rate rate);
         Task<List<Rate>> GetRatesAsync(string currencyCode = null, DateTime? effectiveDate = null);
         Task<int> SaveChangesAsync();
-        Task<List<string>> GetAllCurrencyCodesOnRecordAsync();
+        Task<List<string>> GetAllCurrencyCodesAsync();
     }
 }

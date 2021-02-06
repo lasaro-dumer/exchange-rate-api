@@ -41,9 +41,9 @@ namespace Lasaro.ExchangeRate.Data.Repositories.Implementations
             return await _context.SaveChangesAsync();
         }
 
-        public async Task<List<string>> GetAllCurrencyCodesOnRecordAsync()
+        public async Task<List<string>> GetAllCurrencyCodesAsync()
         {
-            return await _context.Set<Rate>().Select(r => r.CurrencyCode).ToListAsync();
+            return await _context.Set<Currency>().Select(r => r.Code).ToListAsync();
         }
     }
 }

@@ -21,6 +21,8 @@ namespace Lasaro.ExchangeRate.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new RateMap());
+            modelBuilder.ApplyConfiguration(new CurrencyMap());
+            modelBuilder.ApplyConfiguration(new CurrencyExchangeTransactionMap());
 
             base.OnModelCreating(modelBuilder);
         }

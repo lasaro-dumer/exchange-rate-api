@@ -19,6 +19,7 @@ namespace Lasaro.ExchangeRate.Data
             string connectionString = configuration.GetConnectionString("DefaultConnection");
 
             services.AddScoped<IRatesRepository, RatesRepository>();
+            services.AddScoped<ICurrencyExchangeTransactionsRepository, CurrencyExchangeTransactionsRepository>();
             services.AddDbContext<ExchangeRateContext>(optionsBuilder =>
             {
                 optionsBuilder.UseLazyLoadingProxies();
