@@ -34,6 +34,8 @@ namespace Lasaro.ExchangeRate.API
             services.AddExchangeRateData(Configuration);
             services.AddScoped<IRatesService, RatesService>();
             services.AddScoped<ICurrencyExchangeService, CurrencyExchangeService>();
+            services.AddScoped<ICurrencyRateLoaderService, UsdRateLoaderService>();
+            services.AddScoped<ICurrencyRateLoaderService, BrlRateLoaderService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

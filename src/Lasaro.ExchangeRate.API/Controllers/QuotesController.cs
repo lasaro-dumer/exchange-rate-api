@@ -16,10 +16,13 @@ namespace Lasaro.ExchangeRate.API.Controllers
     public class QuotesController : ControllerBase
     {
         public IRatesService RatesService { get; }
-        
-        public QuotesController(IRatesService ratesService)
+        public IEnumerable<ICurrencyRateLoaderService> CurrencyRateLoaders { get; }
+
+        public QuotesController(IRatesService ratesService,
+                                IEnumerable<ICurrencyRateLoaderService> currencyRateLoaders)
         {
             RatesService = ratesService;
+            CurrencyRateLoaders = currencyRateLoaders.OrderBy(cl => cl.Priority);
         }
 
         [HttpGet("all")]
@@ -50,49 +53,21 @@ namespace Lasaro.ExchangeRate.API.Controllers
         [HttpPost("loader")]
         public async Task<IActionResult> LoadCurrencyRates()
         {
-            List<CurrencyQuoteModel> ratesLoaded = new List<CurrencyQuoteModel>();
+            LoaderResultModel loaderResultModel = new LoaderResultModel();
 
-            using (HttpClient httpClient = new HttpClient())
+            foreach (ICurrencyRateLoaderService currencyLoader in CurrencyRateLoaders)
             {
-                string url = $"https://www.bancoprovincia.com.ar/Principal/Dolar";
-
-                using (HttpResponseMessage responseApi = await httpClient.GetAsync(url))
+                try
                 {
-                    string response = await responseApi.Content.ReadAsStringAsync();
-                    if (responseApi.IsSuccessStatusCode)
-                    {
-                        string[] responseObj = JsonConvert.DeserializeObject<string[]>(response);
-
-                        CurrencyQuoteModel usdRate = new CurrencyQuoteModel()
-                        {
-                            CurrencyCode = "USD",
-                            BuyValue = Convert.ToDouble(responseObj[0]),
-                            SellValue = Convert.ToDouble(responseObj[1]),
-                            EffectiveDate = DateTime.Now
-                        };
-
-                        CurrencyQuoteModel brlRate = new CurrencyQuoteModel()
-                        {
-                            CurrencyCode = "BRL",
-                            BuyValue = usdRate.BuyValue / 4,
-                            SellValue = usdRate.SellValue / 4,
-                            EffectiveDate = DateTime.Now
-                        };
-
-                        await RatesService.AddRateAsync(usdRate);
-                        await RatesService.AddRateAsync(brlRate);
-
-                        ratesLoaded.Add(usdRate);
-                        ratesLoaded.Add(brlRate);
-                    }
-                    else
-                    {
-                        return BadRequest("Error fetching response from Banco Provincia, request failed.");
-                    }
+                    loaderResultModel.RatesLoaded.Add(await currencyLoader.LoadRateAsync());
+                }
+                catch (Exception ex)
+                {
+                    loaderResultModel.Errors.Add($"Error loading rate for currency {currencyLoader.CurrencyCode}.");
                 }
             }
 
-            return Ok(ratesLoaded);
+            return Ok(loaderResultModel);
         }
     }
 }
