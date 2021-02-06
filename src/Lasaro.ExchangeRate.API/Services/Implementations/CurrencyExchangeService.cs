@@ -1,15 +1,31 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Lasaro.ExchangeRate.API.Models;
 using Lasaro.ExchangeRate.API.Services.Abstractions;
+using Lasaro.ExchangeRate.Data.Repositories.Abstractions;
 
 namespace Lasaro.ExchangeRate.API.Services.Implementations
 {
     public class CurrencyExchangeService : ICurrencyExchangeService
     {
-        public Task<double> GetUserRemainingLimitAsync(int userId, string currencyCode)
+        public ICurrencyExchangeTransactionsRepository TransactionsRepository { get; }
+
+        public CurrencyExchangeService(ICurrencyExchangeTransactionsRepository transactionsRepository)
         {
-            throw new System.NotImplementedException();
+            TransactionsRepository = transactionsRepository;
+        }
+
+        public async Task<double> GetUserRemainingLimitAsync(int userId, string currencyCode, DateTime transactionDate)
+        {
+            double? currencyTransactionLimitPerMonth = await TransactionsRepository.GetCurrencyTransactionLimitAsync(currencyCode);
+
+            if (!currencyTransactionLimitPerMonth.HasValue)
+                throw new InvalidOperationException($"Currency transaction limite not found for currency code {currencyCode}");
+
+            double amountAlreadyExchanged = await TransactionsRepository.GetUserAmountExchangedPerMonthAsync(userId, currencyCode, transactionDate);
+
+            return currencyTransactionLimitPerMonth.Value - amountAlreadyExchanged;
         }
 
         public double CalculateForeignCurrencyAmount(CurrencyExchangeDirection direction, double localCurrencyAmount, double sellValue, double buyValue)
@@ -31,7 +47,7 @@ namespace Lasaro.ExchangeRate.API.Services.Implementations
                 throw new NotImplementedException("Invalid exchange direction!");
             }
 
-            double ForeignCurrencyAmount = localCurrencyAmount / effectiveRate; 
+            double ForeignCurrencyAmount = localCurrencyAmount / effectiveRate;
 
             return ForeignCurrencyAmount;
         }

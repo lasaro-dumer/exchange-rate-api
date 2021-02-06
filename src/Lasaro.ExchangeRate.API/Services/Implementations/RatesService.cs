@@ -36,7 +36,7 @@ namespace Lasaro.ExchangeRate.API.Services.Implementations
 
         public async Task<bool> IsValidCurrencyToQuoteAsync(string currencyCode)
         {
-            List<string> validCurrencies = await RatesRepository.GetAllCurrencyCodesOnRecordAsync();
+            List<string> validCurrencies = await RatesRepository.GetAllCurrencyCodesAsync();
 
             return validCurrencies.Contains(currencyCode);
         }

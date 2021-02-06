@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Lasaro.ExchangeRate.API.Controllers
 {
+    [ApiController]
     public class SeedController : Controller
     {
         public IRatesRepository RatesRepository { get; }
