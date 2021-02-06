@@ -12,23 +12,23 @@ using Newtonsoft.Json;
 namespace Lasaro.ExchangeRate.API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("quotes")]
     public class QuotesController : ControllerBase
     {
         public IRatesService RatesService { get; }
-
+        
         public QuotesController(IRatesService ratesService)
         {
             RatesService = ratesService;
         }
 
-        [HttpGet]
+        [HttpGet("all")]
         public async Task<IActionResult> GetAllQuotesAsync(DateTime? date = null)
         {
             return Ok(await RatesService.GetRatesAsync(date: date));
         }
 
-        [HttpGet("{currencyCode}")]
+        [HttpGet("currency/{currencyCode}")]
         public async Task<IActionResult> GetAsync(string currencyCode, DateTime? date = null)
         {
             DateTime effectiveDate = DateTime.Now.Date;
@@ -41,11 +41,14 @@ namespace Lasaro.ExchangeRate.API.Controllers
 
             CurrencyQuoteModel currencyQuote = await RatesService.GetRateQuoteAsync(currencyCode, effectiveDate);
 
+            if (currencyQuote == null)
+                return NotFound($"No quote found for {currencyCode} on {effectiveDate}");
+
             return Ok(currencyQuote);
         }
 
-        [HttpPost("source/banco/provincia")]
-        public async Task<IActionResult> LoadFromSourceBancoProvinciaAsync()
+        [HttpPost("loader")]
+        public async Task<IActionResult> LoadCurrencyRates()
         {
             List<CurrencyQuoteModel> ratesLoaded = new List<CurrencyQuoteModel>();
 
