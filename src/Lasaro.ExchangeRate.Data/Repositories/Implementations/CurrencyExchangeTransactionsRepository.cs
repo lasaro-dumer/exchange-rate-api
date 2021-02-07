@@ -18,6 +18,11 @@ namespace Lasaro.ExchangeRate.Data.Repositories.Implementations
             _context = context;
         }
 
+        public void AddTransaction(CurrencyExchangeTransaction transaction)
+        {
+            _context.Add(transaction);
+        }
+
         public async Task<double?> GetCurrencyTransactionLimitAsync(string currencyCode)
         {
             double? limit = (await _context.Set<Currency>()
@@ -25,6 +30,12 @@ namespace Lasaro.ExchangeRate.Data.Repositories.Implementations
                                            .FirstOrDefaultAsync())?.MonthlyTransactionLimit;
             
             return limit;
+        }
+
+        public async Task<List<CurrencyExchangeTransaction>> GetTransactionsAsync()
+        {
+            return await _context.Set<CurrencyExchangeTransaction>()
+                                 .ToListAsync();
         }
 
         public async Task<double> GetUserAmountExchangedPerMonthAsync(int userId, string currencyCode, DateTime dateOfTheMonth)
@@ -37,6 +48,11 @@ namespace Lasaro.ExchangeRate.Data.Repositories.Implementations
                                           .SumAsync(ct => ct.ForeignCurrencyAmount);
 
             return amount;
+        }
+
+        public async Task<int> SaveChangesAsync()
+        {
+            return await _context.SaveChangesAsync();
         }
     }
 }

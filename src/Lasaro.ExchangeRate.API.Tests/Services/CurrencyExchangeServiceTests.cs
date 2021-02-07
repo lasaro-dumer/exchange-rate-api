@@ -24,8 +24,9 @@ namespace Lasaro.ExchangeRate.API.Tests.Services
         public void CalculateForeignCurrencyAmount_Should_Take_Direction_And_Different_Rates_Into_Consideration(CurrencyExchangeDirection direction, double localCurrencyAmount, double sellValue, double buyValue, double expectedAmount)
         {
             //Arrange
-            Mock<ICurrencyExchangeTransactionsRepository> mock = new Mock<ICurrencyExchangeTransactionsRepository>();
-            CurrencyExchangeService currencyExchangeService = new CurrencyExchangeService(mock.Object);
+            Mock<ICurrencyExchangeTransactionsRepository> mockCcyExchgTransaction = new Mock<ICurrencyExchangeTransactionsRepository>();
+            Mock<IRatesRepository> mockRatesRepo = new Mock<IRatesRepository>();
+            CurrencyExchangeService currencyExchangeService = new CurrencyExchangeService(mockCcyExchgTransaction.Object, mockRatesRepo.Object);
 
             //Act
             double actualAmount = currencyExchangeService.CalculateForeignCurrencyAmount(direction, localCurrencyAmount, sellValue, buyValue);
@@ -49,14 +50,16 @@ namespace Lasaro.ExchangeRate.API.Tests.Services
             int userId = 1;
             DateTime transactionDate = DateTime.Now;
 
-            Mock<ICurrencyExchangeTransactionsRepository> mock = new Mock<ICurrencyExchangeTransactionsRepository>();
+            Mock<ICurrencyExchangeTransactionsRepository> mockCcyExchgTransaction = new Mock<ICurrencyExchangeTransactionsRepository>();
+            Mock<IRatesRepository> mockRatesRepo = new Mock<IRatesRepository>();
 
-            mock.Setup(o => o.GetCurrencyTransactionLimitAsync(currencyCode))
-                .ReturnsAsync(currencyLimit);
+            mockCcyExchgTransaction.Setup(o => o.GetCurrencyTransactionLimitAsync(currencyCode))
+                                   .ReturnsAsync(currencyLimit);
 
-            mock.Setup(o => o.GetUserAmountExchangedPerMonthAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<DateTime>()))
-                .ReturnsAsync(currentlyUsedQuota);
-            CurrencyExchangeService currencyExchangeService = new CurrencyExchangeService(mock.Object);
+            mockCcyExchgTransaction.Setup(o => o.GetUserAmountExchangedPerMonthAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<DateTime>()))
+                                   .ReturnsAsync(currentlyUsedQuota);
+
+            CurrencyExchangeService currencyExchangeService = new CurrencyExchangeService(mockCcyExchgTransaction.Object, mockRatesRepo.Object);
 
             //Act
             double actualRemainingLimit = await currencyExchangeService.GetUserRemainingLimitAsync(userId, currencyCode, transactionDate);

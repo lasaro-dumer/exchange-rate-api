@@ -45,5 +45,10 @@ namespace Lasaro.ExchangeRate.Data.Repositories.Implementations
         {
             return await _context.Set<Currency>().Select(r => r.Code.ToUpper()).ToListAsync();
         }
+
+        public async Task<Rate> GetRateByIdAsync(int rateId)
+        {
+            return await _context.Set<Rate>().FirstOrDefaultAsync(r=>r.Id==rateId);
+        }
     }
 }

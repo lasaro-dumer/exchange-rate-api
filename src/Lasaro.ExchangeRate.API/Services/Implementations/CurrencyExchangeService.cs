@@ -3,17 +3,22 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Lasaro.ExchangeRate.API.Models;
 using Lasaro.ExchangeRate.API.Services.Abstractions;
+using Lasaro.ExchangeRate.Data.Entities;
 using Lasaro.ExchangeRate.Data.Repositories.Abstractions;
+using Microsoft.VisualBasic;
 
 namespace Lasaro.ExchangeRate.API.Services.Implementations
 {
     public class CurrencyExchangeService : ICurrencyExchangeService
     {
         public ICurrencyExchangeTransactionsRepository TransactionsRepository { get; }
+        public IRatesRepository RatesRepository { get; }
 
-        public CurrencyExchangeService(ICurrencyExchangeTransactionsRepository transactionsRepository)
+        public CurrencyExchangeService(ICurrencyExchangeTransactionsRepository transactionsRepository,
+                                       IRatesRepository ratesRepository)
         {
             TransactionsRepository = transactionsRepository;
+            RatesRepository = ratesRepository;
         }
 
         public async Task<double> GetUserRemainingLimitAsync(int userId, string currencyCode, DateTime transactionDate)
@@ -50,6 +55,60 @@ namespace Lasaro.ExchangeRate.API.Services.Implementations
             double ForeignCurrencyAmount = localCurrencyAmount / effectiveRate;
 
             return ForeignCurrencyAmount;
+        }
+
+        public async Task<CurrencyExchangeTransactionModel> SubmitTransactionAsync(CurrencyExchangeModel currencyExchangeModel,
+                                                      double foreignCurrencyAmount,
+                                                      DateTime transactionDate,
+                                                      int rateId)
+        {
+            Rate rate = await RatesRepository.GetRateByIdAsync(rateId);
+
+            CurrencyExchangeTransaction transaction = new CurrencyExchangeTransaction()
+            {
+                LocalCurrencyAmount = currencyExchangeModel.LocalCurrencyAmount,
+                ForeignCurrencyAmount = foreignCurrencyAmount,
+                ForeignCurrencyCode = currencyExchangeModel.ForeignCurrencyCode,
+                Rate = rate,
+                TransactionDate = transactionDate,
+                UserId = currencyExchangeModel.UserId
+            };
+
+            TransactionsRepository.AddTransaction(transaction);
+
+            await TransactionsRepository.SaveChangesAsync();
+
+            return new CurrencyExchangeTransactionModel()
+            {
+                Id = transaction.Id,
+                UserId = transaction.UserId,
+                LocalCurrencyAmount = transaction.LocalCurrencyAmount,
+                ForeignCurrencyAmount = transaction.ForeignCurrencyAmount,
+                ForeignCurrencyCode = transaction.ForeignCurrencyCode,
+                TransactionDate = transaction.TransactionDate,
+            };
+        }
+
+        public async Task<List<CurrencyExchangeTransactionModel>> GetTransactionsAsync()
+        {
+            List<CurrencyExchangeTransaction> transactions = await TransactionsRepository.GetTransactionsAsync();
+
+            List<CurrencyExchangeTransactionModel> transactionModels = new List<CurrencyExchangeTransactionModel>();
+
+            foreach (CurrencyExchangeTransaction transaction in transactions)
+            {
+                transactionModels.Add(new CurrencyExchangeTransactionModel()
+                {
+                    Id = transaction.Id,
+                    UserId = transaction.UserId,
+                    LocalCurrencyAmount = transaction.LocalCurrencyAmount,
+                    ForeignCurrencyAmount = transaction.ForeignCurrencyAmount,
+                    ForeignCurrencyCode = transaction.ForeignCurrencyCode,
+                    TransactionDate = transaction.TransactionDate,
+                });
+            }
+
+            return transactionModels;
         }
     }
 }

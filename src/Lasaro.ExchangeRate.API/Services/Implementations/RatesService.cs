@@ -50,6 +50,7 @@ namespace Lasaro.ExchangeRate.API.Services.Implementations
             {
                 CurrencyQuoteModel currencyQuote = new CurrencyQuoteModel()
                 {
+                    RateId = rate.Id,
                     CurrencyCode = rate.CurrencyCode,
                     EffectiveDate = rate.EffectiveDate,
                     BuyValue = rate.BuyValue,
@@ -72,6 +73,7 @@ namespace Lasaro.ExchangeRate.API.Services.Implementations
             {
                 CurrencyQuoteModel currencyQuote = new CurrencyQuoteModel()
                 {
+                    RateId = rate.Id,
                     CurrencyCode = rate.CurrencyCode,
                     EffectiveDate = rate.EffectiveDate,
                     BuyValue = rate.BuyValue,

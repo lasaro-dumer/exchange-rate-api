@@ -27,26 +27,35 @@ namespace Lasaro.ExchangeRate.API.Controllers
             if (!await RatesService.IsValidCurrencyToQuoteAsync(currencyExchangeModel.ForeignCurrencyCode))
                 return BadRequest("Foreign currency not valid");
 
+            if (currencyExchangeModel.Direction == CurrencyExchangeDirection.SellForeign)
+                return BadRequest("Selling foreign currency not fully implemented yet (missing limit business logic).");
+
             DateTime transactionDate = DateTime.Now;
-            CurrencyQuoteModel ForeignCurrencyRate = await RatesService.GetRateQuoteAsync(currencyExchangeModel.ForeignCurrencyCode,
+            CurrencyQuoteModel foreignCurrencyRate = await RatesService.GetRateQuoteAsync(currencyExchangeModel.ForeignCurrencyCode,
                                                                                           transactionDate);
 
-            if (ForeignCurrencyRate == null)
+            if (foreignCurrencyRate == null)
                 return BadRequest($"No rate found for {currencyExchangeModel.ForeignCurrencyCode} on {transactionDate}");
 
-            double ForeignCurrencyAmount = CurrencyExchangeService.CalculateForeignCurrencyAmount(currencyExchangeModel.Direction,
+            double foreignCurrencyAmount = CurrencyExchangeService.CalculateForeignCurrencyAmount(currencyExchangeModel.Direction,
                                                                                                   currencyExchangeModel.LocalCurrencyAmount,
-                                                                                                  ForeignCurrencyRate.SellValue,
-                                                                                                  ForeignCurrencyRate.BuyValue);
+                                                                                                  foreignCurrencyRate.SellValue,
+                                                                                                  foreignCurrencyRate.BuyValue);
 
             double userRemainingLimit = await CurrencyExchangeService.GetUserRemainingLimitAsync(currencyExchangeModel.UserId,
                                                                                                  currencyExchangeModel.ForeignCurrencyCode,
                                                                                                  transactionDate);
 
-            if (userRemainingLimit < ForeignCurrencyAmount)
+            //TODO: This validation works corretly when buying foreign, but needs refactor for selling
+            if (userRemainingLimit < foreignCurrencyAmount)
                 return BadRequest("Operation would exceed monthly limits. Operation cancelled.");
 
-            return Ok("Operation successful");
+            CurrencyExchangeTransactionModel newTransaction = await CurrencyExchangeService.SubmitTransactionAsync(currencyExchangeModel,
+                                                                                                                   foreignCurrencyAmount,
+                                                                                                                   transactionDate,
+                                                                                                                   foreignCurrencyRate.RateId);
+
+            return Ok(newTransaction);
         }
     }
 }
