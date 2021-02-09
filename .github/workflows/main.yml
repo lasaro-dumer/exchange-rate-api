@@ -1,0 +1,43 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x'
+          
+      - name: Restore dependencies
+        working-directory: ./src
+        run: dotnet restore
+      - name: Build
+        working-directory: ./src
+        run: dotnet build --no-restore
+      - name: Test
+        working-directory: ./src
+        run: dotnet test --no-build --verbosity normal
+        
+      - name: Build with dotnet
+        run: dotnet build --configuration Release ./src/Lasaro.ExchangeRate.API/Lasaro.ExchangeRate.API.csproj
+
+      - name: dotnet publish
+        run: dotnet publish -c Release -o publish ./src/Lasaro.ExchangeRate.API/Lasaro.ExchangeRate.API.csproj
+      - uses: akhileshns/heroku-deploy@v3.10.9 # This is the action
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: "lasaro-exchange-rate-api" #Must be unique in Heroku
+          heroku_email: "lasaro.dumer@gmail.com"
+          usedocker: true
+          docker_build_args: |
+            AZR_CONN_STR
+        env:
+          NODE_ENV: production
+          AZR_CONN_STR: ${{ secrets.AZR_CONN_STR }}
