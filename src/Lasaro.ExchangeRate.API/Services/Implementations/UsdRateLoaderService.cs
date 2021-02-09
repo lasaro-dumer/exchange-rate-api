@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -45,19 +46,11 @@ namespace Lasaro.ExchangeRate.API.Services.Implementations
 
                         string[] responseObj = JsonConvert.DeserializeObject<string[]>(response);
 
-                        string buyValueString = responseObj[0];
-                        if(buyValueString.Contains('.'))
-                            buyValueString = buyValueString.Replace('.', ',');
-
-                        string sellValueString = responseObj[1];
-                        if (sellValueString.Contains('.'))
-                            sellValueString = sellValueString.Replace('.', ',');
-
                         usdRate = new CurrencyQuoteModel()
                         {
                             CurrencyCode = "USD",
-                            BuyValue = Convert.ToDouble(buyValueString),
-                            SellValue = Convert.ToDouble(sellValueString),
+                            BuyValue = Convert.ToDouble(responseObj[0], new CultureInfo("en-US")),
+                            SellValue = Convert.ToDouble(responseObj[1], new CultureInfo("en-US")),
                             EffectiveDate = DateTime.Now
                         };
 
