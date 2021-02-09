@@ -36,8 +36,8 @@ jobs:
         env:
             SQLCONNSTR_DefaultConnection: "${{secrets.AZR_CONN_STR}}"
 
-      - uses: akhileshns/heroku-deploy@v3.10.9 # This is the action
-        name: Heroku config set
+      - name: Heroku config set
+        uses: akhileshns/heroku-deploy@v3.10.9 # This is the action
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: "lasaro-exchange-rate-api" #Must be unique in Heroku
@@ -46,8 +46,8 @@ jobs:
         run: |
             heroku auth:whoami
             heroku config:set --app $APP_NAME SQLCONNSTR_DefaultConnection="${{secrets.AZR_CONN_STR}}" >> /dev/null
-      - uses: akhileshns/heroku-deploy@v3.10.9 # This is the action
-        name: Heroku deploy
+      - name: Heroku deploy
+        uses: akhileshns/heroku-deploy@v3.10.9 # This is the action
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: "lasaro-exchange-rate-api" #Must be unique in Heroku
