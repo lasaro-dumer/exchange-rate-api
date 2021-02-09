@@ -39,8 +39,8 @@ jobs:
       - uses: akhileshns/heroku-deploy@v3.10.9 # This is the action
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: ""
-          heroku_email: "YOUR EMAIL"
+          heroku_app_name: "lasaro-exchange-rate-api" #Must be unique in Heroku
+          heroku_email: "lasaro.dumer@gmail.com"
           justlogin: true
       - run: |
             heroku auth:whoami
