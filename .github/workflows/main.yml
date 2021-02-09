@@ -28,7 +28,7 @@ jobs:
       - name: Build with dotnet
         run: dotnet build --configuration Release ./src/Lasaro.ExchangeRate.API/Lasaro.ExchangeRate.API.csproj
 
-      - name: dotnet publish
+      - name: dotnet publish and DB update
         run: |
             dotnet publish -c Release -o publish ./src/Lasaro.ExchangeRate.API/Lasaro.ExchangeRate.API.csproj
             dotnet tool install --global dotnet-ef
@@ -37,15 +37,17 @@ jobs:
             SQLCONNSTR_DefaultConnection: "${{secrets.AZR_CONN_STR}}"
 
       - uses: akhileshns/heroku-deploy@v3.10.9 # This is the action
+        name: Heroku config set
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: "lasaro-exchange-rate-api" #Must be unique in Heroku
           heroku_email: "lasaro.dumer@gmail.com"
           justlogin: true
-      - run: |
+        run: |
             heroku auth:whoami
             heroku config:set --app $APP_NAME SQLCONNSTR_DefaultConnection="${{secrets.AZR_CONN_STR}}" >> /dev/null
       - uses: akhileshns/heroku-deploy@v3.10.9 # This is the action
+        name: Heroku deploy
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: "lasaro-exchange-rate-api" #Must be unique in Heroku
