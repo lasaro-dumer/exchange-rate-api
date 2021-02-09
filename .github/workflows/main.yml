@@ -34,7 +34,7 @@ jobs:
             dotnet tool install --global dotnet-ef
             dotnet ef database update --project ./src/Lasaro.ExchangeRate.Data/Lasaro.ExchangeRate.Data.csproj
         env:
-            SQLCONNSTR__DefaultConnection: "${{secrets.AZR_CONN_STR}}"
+            SQLCONNSTR_DefaultConnection: "${{secrets.AZR_CONN_STR}}"
 
       - uses: akhileshns/heroku-deploy@v3.10.9 # This is the action
         with:
