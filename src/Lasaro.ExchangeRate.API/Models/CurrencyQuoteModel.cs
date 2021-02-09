@@ -10,6 +10,6 @@ namespace Lasaro.ExchangeRate.API.Models
         public string CurrencyCode { get; set; }
         public DateTime EffectiveDate { get; set; }
         public double BuyValue { get; set; }
-        public double SellValue { get; internal set; }
+        public double SellValue { get; set; }
     }
 }

@@ -31,6 +31,12 @@ namespace Lasaro.ExchangeRate.API.Controllers
             return Ok(await RatesService.GetRatesAsync(date: date));
         }
 
+        [HttpGet("latest")]
+        public async Task<IActionResult> GetLatestQuotesAsync(DateTime? date = null)
+        {
+            return Ok(await RatesService.GetLatestRatesAsync(date: date));
+        }
+
         [HttpGet("currency/{currencyCode}")]
         public async Task<IActionResult> GetAsync(string currencyCode, DateTime? date = null)
         {
@@ -50,24 +56,24 @@ namespace Lasaro.ExchangeRate.API.Controllers
             return Ok(currencyQuote);
         }
 
-        [HttpPost("loader")]
-        public async Task<IActionResult> LoadCurrencyRates()
+        [HttpPost("refresh")]
+        public async Task<IActionResult> RefreshCurrencyRates()
         {
-            LoaderResultModel loaderResultModel = new LoaderResultModel();
+            RefreshResultModel refreshResultModel = new RefreshResultModel();
 
             foreach (ICurrencyRateLoaderService currencyLoader in CurrencyRateLoaders)
             {
                 try
                 {
-                    loaderResultModel.RatesLoaded.Add(await currencyLoader.LoadRateAsync());
+                    refreshResultModel.RatesLoaded.Add(await currencyLoader.LoadRateAsync());
                 }
                 catch (Exception ex)
                 {
-                    loaderResultModel.Errors.Add($"Error loading rate for currency {currencyLoader.CurrencyCode}.");
+                    refreshResultModel.Errors.Add($"Error loading rate for currency {currencyLoader.CurrencyCode}: {ex.Message}");
                 }
             }
 
-            return Ok(loaderResultModel);
+            return Ok(refreshResultModel);
         }
     }
 }

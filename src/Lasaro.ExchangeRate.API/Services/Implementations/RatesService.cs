@@ -6,6 +6,7 @@ using Lasaro.ExchangeRate.API.Models;
 using Lasaro.ExchangeRate.API.Services.Abstractions;
 using Lasaro.ExchangeRate.Data.Entities;
 using Lasaro.ExchangeRate.Data.Repositories.Abstractions;
+using Serilog;
 
 namespace Lasaro.ExchangeRate.API.Services.Implementations
 {
@@ -43,11 +44,15 @@ namespace Lasaro.ExchangeRate.API.Services.Implementations
 
         public async Task<CurrencyQuoteModel> GetRateQuoteAsync(string currencyCode, DateTime date)
         {
+            Log.Information($"Searching for {currencyCode} rate for {date}");
+
             Rate rate = (await RatesRepository.GetRatesAsync(currencyCode, date))
                                               .FirstOrDefault();
 
             if (rate != null)
             {
+                Log.Information($"Found rate");
+
                 CurrencyQuoteModel currencyQuote = new CurrencyQuoteModel()
                 {
                     RateId = rate.Id,
@@ -59,31 +64,53 @@ namespace Lasaro.ExchangeRate.API.Services.Implementations
 
                 return currencyQuote;
             }
+            else
+            {
+                Log.Information($"No rate found");
+            }
 
             return null;
         }
 
-        public async Task<List<CurrencyQuoteModel>> GetRatesAsync(string currencyCode = null, DateTime? date = null)
+        private async Task<List<CurrencyQuoteModel>> GetRatesAsync(string currencyCode = null, DateTime? date = null, bool? onlyLatest = false)
         {
             List<CurrencyQuoteModel> currencyQuotes = new List<CurrencyQuoteModel>();
 
+            Log.Information($"Searching for '{currencyCode}' rates for '{date}'");
+
             List<Rate> rates = await RatesRepository.GetRatesAsync(currencyCode, date);
+
+            Log.Information($"Found '{rates.Count}' rates");
 
             foreach (Rate rate in rates)
             {
-                CurrencyQuoteModel currencyQuote = new CurrencyQuoteModel()
+                bool skipCurrentRecord = onlyLatest.HasValue && onlyLatest.Value && currencyQuotes.Any(q => q.CurrencyCode == rate.CurrencyCode);
+                if (!skipCurrentRecord)
                 {
-                    RateId = rate.Id,
-                    CurrencyCode = rate.CurrencyCode,
-                    EffectiveDate = rate.EffectiveDate,
-                    BuyValue = rate.BuyValue,
-                    SellValue = rate.SellValue
-                };
+                    CurrencyQuoteModel currencyQuote = new CurrencyQuoteModel()
+                    {
+                        RateId = rate.Id,
+                        CurrencyCode = rate.CurrencyCode,
+                        EffectiveDate = rate.EffectiveDate,
+                        BuyValue = rate.BuyValue,
+                        SellValue = rate.SellValue
+                    };
 
-                currencyQuotes.Add(currencyQuote);
+                    currencyQuotes.Add(currencyQuote);
+                }
             }
 
             return currencyQuotes;
+        }
+
+        public async Task<List<CurrencyQuoteModel>> GetRatesAsync(string currencyCode = null, DateTime? date = null)
+        {
+            return await GetRatesAsync(currencyCode, date, onlyLatest: false);
+        }
+
+        public async Task<List<CurrencyQuoteModel>> GetLatestRatesAsync(string currencyCode = null, DateTime? date = null)
+        {
+            return await GetRatesAsync(currencyCode, date, onlyLatest: true);
         }
     }
 }

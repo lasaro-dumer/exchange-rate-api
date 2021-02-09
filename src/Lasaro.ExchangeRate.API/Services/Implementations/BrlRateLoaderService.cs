@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Lasaro.ExchangeRate.API.Models;
 using Lasaro.ExchangeRate.API.Services.Abstractions;
+using Serilog;
 
 namespace Lasaro.ExchangeRate.API.Services.Implementations
 {
@@ -21,7 +22,13 @@ namespace Lasaro.ExchangeRate.API.Services.Implementations
         public async Task<CurrencyQuoteModel> LoadRateAsync()
         {
             DateTime rateDate = DateTime.Now;
+
+            Log.Information("Loading BRL rates for {rateDate}", rateDate);
+            Log.Information("Getting USD rate for {rateDate} to derivate BRL", rateDate);
+
             CurrencyQuoteModel usdRate = await RatesService.GetRateQuoteAsync("USD", rateDate);
+
+            Log.Information("Retrieved USD rate: {usdRate}", usdRate);
 
             CurrencyQuoteModel brlRate = new CurrencyQuoteModel()
             {
@@ -30,6 +37,8 @@ namespace Lasaro.ExchangeRate.API.Services.Implementations
                 SellValue = usdRate.SellValue / 4,
                 EffectiveDate = rateDate
             };
+
+            Log.Information("Derivated BRL rate: {brlRate}", brlRate);
 
             await RatesService.AddRateAsync(brlRate);
 

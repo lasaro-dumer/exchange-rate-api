@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Lasaro.ExchangeRate.API.Models;
 using Lasaro.ExchangeRate.API.Services.Abstractions;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace Lasaro.ExchangeRate.API.Services.Implementations
 {
@@ -22,17 +23,26 @@ namespace Lasaro.ExchangeRate.API.Services.Implementations
 
         public async Task<CurrencyQuoteModel> LoadRateAsync()
         {
+            Log.Information("Starting to load USD rate");
+
             CurrencyQuoteModel usdRate = null;
 
             using (HttpClient httpClient = new HttpClient())
             {
                 string url = $"https://www.bancoprovincia.com.ar/Principal/Dolar";
 
+                Log.Information("Performing HTTP Request");
+
                 using (HttpResponseMessage responseApi = await httpClient.GetAsync(url))
                 {
+                    Log.Information("Response received");
+
                     string response = await responseApi.Content.ReadAsStringAsync();
+
                     if (responseApi.IsSuccessStatusCode)
                     {
+                        Log.Information("Response success, parsing to object. Raw string: {response}", response);
+
                         string[] responseObj = JsonConvert.DeserializeObject<string[]>(response);
 
                         usdRate = new CurrencyQuoteModel()
@@ -42,6 +52,8 @@ namespace Lasaro.ExchangeRate.API.Services.Implementations
                             SellValue = Convert.ToDouble(responseObj[1].Replace('.', ',')),
                             EffectiveDate = DateTime.Now
                         };
+
+                        Log.Information("Parsed rate: {usdRate}", usdRate);
 
                         await RatesService.AddRateAsync(usdRate);
                     }

@@ -12,6 +12,7 @@ namespace Lasaro.ExchangeRate.API.Services.Abstractions
         Task<bool> AddRateAsync(CurrencyQuoteModel currencyQuote);
         Task<CurrencyQuoteModel> GetRateQuoteAsync(string currencyCode, DateTime date);
         Task<List<CurrencyQuoteModel>> GetRatesAsync(string currencyCode = null, DateTime? date = null);
+        Task<List<CurrencyQuoteModel>> GetLatestRatesAsync(string currencyCode = null, DateTime? date = null);
         Task<bool> IsValidCurrencyToQuoteAsync(string currencyCode);
     }
 }

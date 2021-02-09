@@ -31,7 +31,9 @@ namespace Lasaro.ExchangeRate.Data.Repositories.Implementations
                 ratesQuery = ratesQuery.Where(r => r.CurrencyCode.ToUpper() == currencyCode.ToUpper());
 
             if (effectiveDate.HasValue)
-                ratesQuery = ratesQuery.Where(r => r.EffectiveDate.Date == effectiveDate.Value.Date);
+                ratesQuery = ratesQuery.Where(r => r.EffectiveDate.Date.Year == effectiveDate.Value.Date.Year &&
+                                                   r.EffectiveDate.Date.Month == effectiveDate.Value.Date.Month &&
+                                                   r.EffectiveDate.Date.Day == effectiveDate.Value.Date.Day);
 
             return await ratesQuery.OrderByDescending(r => r.CreateDate).ToListAsync();
         }
@@ -48,7 +50,7 @@ namespace Lasaro.ExchangeRate.Data.Repositories.Implementations
 
         public async Task<Rate> GetRateByIdAsync(int rateId)
         {
-            return await _context.Set<Rate>().FirstOrDefaultAsync(r=>r.Id==rateId);
+            return await _context.Set<Rate>().FirstOrDefaultAsync(r => r.Id == rateId);
         }
     }
 }
