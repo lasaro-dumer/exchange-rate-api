@@ -31,9 +31,11 @@ jobs:
       - name: dotnet publish
         run: |
             dotnet publish -c Release -o publish ./src/Lasaro.ExchangeRate.API/Lasaro.ExchangeRate.API.csproj
-            export SQLCONNSTR__DefaultConnection="${{secrets.AZR_CONN_STR}}"
             dotnet tool install --global dotnet-ef
             dotnet ef database update --project ./src/Lasaro.ExchangeRate.Data/Lasaro.ExchangeRate.Data.csproj
+        env:
+            SQLCONNSTR__DefaultConnection: "${{secrets.AZR_CONN_STR}}"
+
       - uses: akhileshns/heroku-deploy@v3.10.9 # This is the action
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
