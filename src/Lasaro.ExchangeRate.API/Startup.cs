@@ -31,6 +31,10 @@ namespace Lasaro.ExchangeRate.API
         {
             services.AddControllers()
                     .AddNewtonsoftJson();
+
+            // Register the Swagger generator, defining 1 or more Swagger documents
+            services.AddSwaggerGen();
+
             services.AddExchangeRateData(Configuration);
             services.AddScoped<IRatesService, RatesService>();
             services.AddScoped<ICurrencyExchangeService, CurrencyExchangeService>();
@@ -55,6 +59,17 @@ namespace Lasaro.ExchangeRate.API
             });
 
             app.UseHttpsRedirection();
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lasaro Exchange Rate API");
+                c.RoutePrefix = string.Empty;
+            });
 
             app.UseRouting();
 
